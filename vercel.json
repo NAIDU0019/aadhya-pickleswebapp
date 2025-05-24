@@ -1,5 +1,14 @@
+
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
-  ]
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/api/sendEmail.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "env": {
+    "EMAIL_USER": "@email_user",
+    "EMAIL_PASS": "@email_pass"
+  }
 }
