@@ -134,8 +134,8 @@ export const products: Product[] = [
     pricePerWeight: {
       "100": 100,
       "250": 199,
-      "500": 369,
-      "1000": 1889,
+      "500": 397,
+      "1000": 889,
     },
     stockPerWeight: {
       "100": 10,
@@ -176,10 +176,10 @@ export const products: Product[] = [
     description: "Juicy prawns cooked and preserved in traditional pickle masala.",
     ingredients: "Prawns, mustard oil, garlic, ginger, vinegar",
     pricePerWeight: {
-      "100": 90,
-      "250": 209,
-      "500": 389,
-      "1000": 719,
+      "100": 129,
+      "250": 309,
+      "500": 599,
+      "1000": 1199,
     },
     stockPerWeight: {
       "100": 10,
@@ -220,10 +220,10 @@ export const products: Product[] = [
     description: "Slow-cooked tender mutton with bold spices.",
     ingredients: "Mutton, mustard oil, garlic, ginger, garam masala",
     pricePerWeight: {
-      "100": 100,
-      "250": 219,
-      "500": 399,
-      "1000": 749,
+      "100": 180,
+      "250": 449,
+      "500": 899,
+      "1000": 1799,
     },
     stockPerWeight: {
       "100": 5,
@@ -242,10 +242,10 @@ export const products: Product[] = [
     description: "Rich and spicy crab pickle that delivers coastal flavor with every bite.",
     ingredients: "Crab, mustard oil, chili powder, garlic, ginger, spices",
     pricePerWeight: {
-      "100": 110,
-      "250": 249,
-      "500": 469,
-      "1000": 899,
+      "100": 230,
+      "250": 549,
+      "500": 1099,
+      "1000":1999,
     },
     stockPerWeight: {
       "100": 10,
@@ -264,10 +264,10 @@ export const products: Product[] = [
     description: "A fiery fusion of tangy gongura leaves and succulent chicken pieces.",
     ingredients: "Chicken, gongura leaves, mustard oil, red chili, garlic, spices",
     pricePerWeight: {
-      "100": 70,
-      "250": 159,
-      "500": 299,
-      "1000": 599,
+      "100": 89,
+      "250": 249,
+      "500": 499,
+      "1000": 899,
     },
     stockPerWeight: {
       "100": 10,
