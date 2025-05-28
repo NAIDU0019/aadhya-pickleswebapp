@@ -42,13 +42,14 @@ const checkoutFormSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
 
-const TAX_RATE = 0.1; // 10% tax for example
+const TAX_RATE = 0; // 10% tax for example
 const ADDITIONAL_FEES = 0; // Flat additional fees example
 
 // Define your coupons here. In a real application, these would likely come from a database.
 const COUPONS = [
-  { code: "ADHYAA6", discountPercent: 0.06 }, // 6% discount
-  { code: "ADHYAA12", discountPercent: 0.12 }, // 12% discount
+  { code: "ADH5", discountPercent: 0.05 }, // 5% discount (formerly 6%)
+  { code: "ADH10", discountPercent: 0.10 }, // 10% discount (formerly 12%)
+  { code: "FIRSTORDER", discountPercent: 0.12 }, // 12% discount for first order
 ];
 
 const CheckoutPage = () => {
@@ -158,21 +159,37 @@ const CheckoutPage = () => {
     );
   }
 
-  // Calculate subtotal, taxes, shipping, and initial final total
+  // --- START: ORDER CALCULATION LOGIC ---
+  // 1. Calculate Subtotal (sum of item prices)
   const subtotal = items.reduce((acc, item) => {
     const unitPrice = item.product.pricePerWeight?.[item.weight] || 0;
     return acc + unitPrice * item.quantity;
   }, 0);
 
-  const taxes = subtotal * TAX_RATE;
-  const shippingCost = subtotal > 1000 ? 0 : 100; // Free shipping over ₹1000
-  const initialFinalTotal = subtotal + taxes + shippingCost + ADDITIONAL_FEES;
+  // 2. Calculate Discount Amount (applied to subtotal)
+  const discountAmount = appliedCoupon ? subtotal * appliedCoupon.discountPercent : 0;
 
-  // Calculate discount amount based on applied coupon - NOW APPLIED TO THE FULL INITIAL TOTAL
-  const discountAmount = appliedCoupon ? initialFinalTotal * appliedCoupon.discountPercent : 0;
+  // 3. Calculate Subtotal After Discount
+  const discountedSubtotal = subtotal - discountAmount;
 
-  // Recalculate final total with discount
-  const finalTotalWithDiscount = initialFinalTotal - discountAmount;
+  // 4. Calculate Shipping Cost based on original subtotal for thresholds
+  let shippingCost = 0;
+  if (subtotal > 1000) {
+    shippingCost = 0; // Free shipping over ₹1000
+  } else if (subtotal < 250) {
+    shippingCost = 55;
+  } else if (subtotal < 500) {
+    shippingCost = 65;
+  } else {
+    shippingCost = 70; // For subtotals between ₹500 and ₹1000 (inclusive)
+  }
+
+  // 5. Calculate Taxes (applied to discounted subtotal)
+  const taxes = discountedSubtotal * TAX_RATE;
+
+  // 6. Calculate Final Total
+  const finalTotal = discountedSubtotal + taxes + shippingCost + ADDITIONAL_FEES;
+  // --- END: ORDER CALCULATION LOGIC ---
 
   const handleApplyCoupon = () => {
     const codeToApply = couponCode.trim().toUpperCase();
@@ -185,6 +202,13 @@ const CheckoutPage = () => {
       setAppliedCoupon(null);
       toast.error("Invalid coupon code. Please try again.");
     }
+  };
+
+  // Function to remove the currently applied coupon
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode(""); // Clear the input field
+    toast.info("Coupon removed.");
   };
 
   // Function to send email and navigate to success page
@@ -206,8 +230,8 @@ const CheckoutPage = () => {
           postalCode: data.postalCode,
           phoneNumber: data.phoneNumber,
           paymentMethod: data.paymentMethod,
-          totalAmount: finalTotalWithDiscount, // Send the discounted total
-          orderDetails: { items, total: initialFinalTotal }, // You might want to send original total for context
+          totalAmount: finalTotal, // Send the final calculated total
+          orderDetails: { items, subtotal, discountAmount, taxes, shippingCost, additionalFees: ADDITIONAL_FEES, finalTotal },
           paymentId: paymentId, // Include Razorpay payment ID if available
         }),
       });
@@ -222,7 +246,7 @@ const CheckoutPage = () => {
         state: {
           customerInfo: data,
           orderedItems: items,
-          orderTotal: finalTotalWithDiscount, // Pass the discounted total
+          orderTotal: finalTotal, // Pass the final total
         },
       });
       setIsSubmitting(false); // Re-enable button after navigation attempt
@@ -326,7 +350,7 @@ const CheckoutPage = () => {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Address</FormLabel>
+                        <FormLabel>Address</Label>
                         <FormControl>
                           <Input placeholder="123 Main St" {...field} />
                         </FormControl>
@@ -341,7 +365,7 @@ const CheckoutPage = () => {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City</FormLabel>
+                        <FormLabel>City</Label>
                         <FormControl>
                           <Input placeholder="Mumbai" {...field} />
                         </FormControl>
@@ -356,7 +380,7 @@ const CheckoutPage = () => {
                     name="state"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>State</FormLabel>
+                        <FormLabel>State</Label>
                         <FormControl>
                           <Input placeholder="Maharashtra" {...field} />
                         </FormControl>
@@ -371,7 +395,7 @@ const CheckoutPage = () => {
                     name="postalCode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Postal Code</FormLabel>
+                        <FormLabel>Postal Code</Label>
                         <FormControl>
                           <Input placeholder="400001" {...field} />
                         </FormControl>
@@ -386,7 +410,7 @@ const CheckoutPage = () => {
                     name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
+                        <FormLabel>Phone Number</Label>
                         <FormControl>
                           <Input placeholder="+91 9876543210" {...field} />
                         </FormControl>
@@ -401,7 +425,7 @@ const CheckoutPage = () => {
                     name="paymentMethod"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Payment Method</FormLabel>
+                        <FormLabel>Payment Method</Label>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
@@ -460,6 +484,14 @@ const CheckoutPage = () => {
                 {appliedCoupon && (
                   <p className="text-sm text-green-600 mt-2">
                     Coupon "{appliedCoupon.code}" applied! You save {formatPrice(discountAmount)}.
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={handleRemoveCoupon}
+                      className="text-red-500 hover:text-red-700 ml-2 h-auto p-0 text-xs"
+                    >
+                      Remove
+                    </Button>
                   </p>
                 )}
               </div>
@@ -467,7 +499,7 @@ const CheckoutPage = () => {
               {/* Razorpay Checkout Component (renders when showRazorpayButton is true) */}
               {showRazorpayButton && customerInfo && (
                 <RazorpayCheckout
-                  amount={finalTotalWithDiscount} // Pass the discounted amount to Razorpay
+                  amount={finalTotal} // Pass the final total to Razorpay
                   customerInfo={customerInfo}
                   onSuccess={(paymentResponse: any) => {
                     toast.success("Payment successful!");
@@ -552,16 +584,16 @@ const CheckoutPage = () => {
                     <span>Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Coupon Discount ({appliedCoupon.discountPercent * 100}%)</span>
+                      <span>- {formatPrice(discountAmount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span>Tax ({TAX_RATE * 100}%)</span>
                     <span>{formatPrice(taxes)}</span>
                   </div>
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Discount ({appliedCoupon.discountPercent * 100}%)</span>
-                      <span>- {formatPrice(discountAmount)}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between">
                     <span>Shipping</span>
                     <span>{shippingCost === 0 ? "Free" : formatPrice(shippingCost)}</span>
@@ -575,7 +607,7 @@ const CheckoutPage = () => {
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>{formatPrice(finalTotalWithDiscount)}</span>
+                    <span>{formatPrice(finalTotal)}</span>
                   </div>
                 </div>
 
