@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Twitter, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -70,6 +69,12 @@ export default function Footer() {
                   Shipping Policy
                 </Link>
               </li>
+              {/* NEW REFUND POLICY LINK */}
+              <li>
+                <Link to="/refund-policy" className="text-muted-foreground hover:text-foreground">
+                  Refund Policy
+                </Link>
+              </li>
               <li>
                 <Link to="/return-policy" className="text-muted-foreground hover:text-foreground">
                   Return Policy
@@ -99,9 +104,9 @@ export default function Footer() {
               Join our newsletter for updates and special offers.
             </p>
             <div className="flex flex-col space-y-2">
-              <Input 
-                type="email" 
-                placeholder="Your email address" 
+              <Input
+                type="email"
+                placeholder="Your email address"
                 className="bg-white"
               />
               <Button>Subscribe</Button>
