@@ -350,7 +350,7 @@ const CheckoutPage = () => {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Address</FormLabel>>
+                        <FormLabel>Address</FormLabel>
                         <FormControl>
                           <Input placeholder="123 Main St" {...field} />
                         </FormControl>
