@@ -21,7 +21,7 @@ import ReturnPolicy from "./pages/ReturnPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import FAQ from "./pages/FAQ";
-
+import RefundPolicy from './pages/RefundPolicy'; 
 
 const queryClient = new QueryClient();
 
