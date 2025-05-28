@@ -45,10 +45,22 @@ type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
 const TAX_RATE = 0.1; // 10% tax for example
 const ADDITIONAL_FEES = 0; // Flat additional fees example
 
+// Define your coupons here. In a real application, these would likely come from a database.
+const COUPONS = [
+  { code: "ADHYAAww5", discountPercent: 0.05 }, // 6% discount
+  { code: "ADHYAAww10", discountPercent: 0.10 },
+  { code: "FIRSTORDER", discountPercent: 0.10 },// 12% discount
+];
+
 const CheckoutPage = () => {
   const { user, isSignedIn } = useUser();
-  const { items, updateItemQuantity, removeItem, clearCart } = useCart(); // Added clearCart
+  const { items, updateItemQuantity, removeItem, clearCart } = useCart();
   const navigate = useNavigate();
+  
+  // State for coupon management
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountPercent: number } | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRazorpayButton, setShowRazorpayButton] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<any>(null); // State to hold form data for Razorpay
@@ -147,7 +159,7 @@ const CheckoutPage = () => {
     );
   }
 
-  // Calculate subtotal, taxes, shipping, and final total
+  // Calculate subtotal, taxes, shipping, and initial final total
   const subtotal = items.reduce((acc, item) => {
     const unitPrice = item.product.pricePerWeight?.[item.weight] || 0;
     return acc + unitPrice * item.quantity;
@@ -155,16 +167,37 @@ const CheckoutPage = () => {
 
   const taxes = subtotal * TAX_RATE;
   const shippingCost = subtotal > 1000 ? 0 : 100; // Free shipping over ₹1000
-  const finalTotal = subtotal + taxes + shippingCost + ADDITIONAL_FEES;
+  const initialFinalTotal = subtotal + taxes + shippingCost + ADDITIONAL_FEES;
+
+  // Calculate discount amount based on applied coupon
+  const discountAmount = appliedCoupon ? subtotal * appliedCoupon.discountPercent : 0;
+
+  // Recalculate final total with discount
+  const finalTotalWithDiscount = initialFinalTotal - discountAmount;
+
+  const handleApplyCoupon = () => {
+    const codeToApply = couponCode.trim().toUpperCase();
+    const foundCoupon = COUPONS.find(c => c.code === codeToApply);
+
+    if (foundCoupon) {
+      setAppliedCoupon(foundCoupon);
+      toast.success(`Coupon "${foundCoupon.code}" applied successfully! You got ${foundCoupon.discountPercent * 100}% off.`);
+    } else {
+      setAppliedCoupon(null);
+      toast.error("Invalid coupon code. Please try again.");
+    }
+  };
 
   // Function to send email and navigate to success page
   const handleSendEmailAndNavigate = async (data: CheckoutFormValues, paymentId?: string) => {
     try {
-      // Use environment variable for backend URL
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"; // Use environment variable for backend URL
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
       await fetch(`${backendUrl}/api/send-email`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Applied-Coupon": appliedCoupon?.code || "" // Send coupon code to backend for server-side validation
+        },
         body: JSON.stringify({
           email: data.email,
           fullName: data.fullName,
@@ -174,7 +207,8 @@ const CheckoutPage = () => {
           postalCode: data.postalCode,
           phoneNumber: data.phoneNumber,
           paymentMethod: data.paymentMethod,
-          orderDetails: { items, total: finalTotal },
+          totalAmount: finalTotalWithDiscount, // Send the discounted total
+          orderDetails: { items, total: initialFinalTotal }, // You might want to send original total for context
           paymentId: paymentId, // Include Razorpay payment ID if available
         }),
       });
@@ -189,7 +223,7 @@ const CheckoutPage = () => {
         state: {
           customerInfo: data,
           orderedItems: items,
-          orderTotal: finalTotal,
+          orderTotal: finalTotalWithDiscount, // Pass the discounted total
         },
       });
       setIsSubmitting(false); // Re-enable button after navigation attempt
@@ -203,7 +237,7 @@ const CheckoutPage = () => {
     if (data.paymentMethod === "razorpay") {
       setCustomerInfo(data); // Store form data for Razorpay component
       setShowRazorpayButton(true); // Show Razorpay button/modal
-      setIsSubmitting(false); // Allow Razorpay to handle its own submission state
+      // isSubmitting remains true until Razorpay callback, or set to false on failure
     } else if (data.paymentMethod === "cod") {
       handleSendEmailAndNavigate(data); // Process COD order directly
     } else {
@@ -406,10 +440,35 @@ const CheckoutPage = () => {
                 </form>
               </Form>
 
+              {/* Coupon Code Section */}
+              <div className="mt-8 p-4 bg-card rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold mb-3">Have a coupon code?</h3>
+                <div className="flex space-x-2">
+                  <Input
+                    type="text"
+                    placeholder="Enter coupon code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    className="flex-grow"
+                  />
+                  <Button
+                    onClick={handleApplyCoupon}
+                    disabled={isSubmitting || !couponCode.trim()}
+                  >
+                    Apply
+                  </Button>
+                </div>
+                {appliedCoupon && (
+                  <p className="text-sm text-green-600 mt-2">
+                    Coupon "{appliedCoupon.code}" applied! You save {formatPrice(discountAmount)}.
+                  </p>
+                )}
+              </div>
+
               {/* Razorpay Checkout Component (renders when showRazorpayButton is true) */}
               {showRazorpayButton && customerInfo && (
                 <RazorpayCheckout
-                  amount={finalTotal}
+                  amount={finalTotalWithDiscount} // Pass the discounted amount to Razorpay
                   customerInfo={customerInfo}
                   onSuccess={(paymentResponse: any) => {
                     toast.success("Payment successful!");
@@ -498,6 +557,12 @@ const CheckoutPage = () => {
                     <span>Tax ({TAX_RATE * 100}%)</span>
                     <span>{formatPrice(taxes)}</span>
                   </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount ({appliedCoupon.discountPercent * 100}%)</span>
+                      <span>- {formatPrice(discountAmount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span>Shipping</span>
                     <span>{shippingCost === 0 ? "Free" : formatPrice(shippingCost)}</span>
@@ -511,11 +576,11 @@ const CheckoutPage = () => {
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>{formatPrice(finalTotal)}</span>
+                    <span>{formatPrice(finalTotalWithDiscount)}</span>
                   </div>
                 </div>
 
-                {/* New: Continue Shopping Button */}
+                {/* Continue Shopping Button */}
                 <div className="mt-6">
                   <Button variant="outline" className="w-full" onClick={() => navigate("/products")}>
                     Continue Shopping / Add More Items
