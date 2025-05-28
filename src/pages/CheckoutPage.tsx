@@ -350,7 +350,7 @@ const CheckoutPage = () => {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Address</Label>
+                        <FormLabel>Address</FormLabel>>
                         <FormControl>
                           <Input placeholder="123 Main St" {...field} />
                         </FormControl>
@@ -365,7 +365,7 @@ const CheckoutPage = () => {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City</Label>
+                        <FormLabel>City</FormLabel>
                         <FormControl>
                           <Input placeholder="Mumbai" {...field} />
                         </FormControl>
@@ -380,7 +380,7 @@ const CheckoutPage = () => {
                     name="state"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>State</Label>
+                        <FormLabel>State</FormLabel>
                         <FormControl>
                           <Input placeholder="Maharashtra" {...field} />
                         </FormControl>
@@ -395,7 +395,7 @@ const CheckoutPage = () => {
                     name="postalCode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Postal Code</Label>
+                        <FormLabel>Postal Code</FormLabel>
                         <FormControl>
                           <Input placeholder="400001" {...field} />
                         </FormControl>
@@ -410,7 +410,7 @@ const CheckoutPage = () => {
                     name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number</Label>
+                        <FormLabel>Phone Number</FormLabel>
                         <FormControl>
                           <Input placeholder="+91 9876543210" {...field} />
                         </FormControl>
@@ -425,7 +425,7 @@ const CheckoutPage = () => {
                     name="paymentMethod"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Payment Method</Label>
+                        <FormLabel>Payment Method</FormLabel>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
