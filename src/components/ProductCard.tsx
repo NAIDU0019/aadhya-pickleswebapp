@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { Button } from "@/components/ui/button";
 import { BadgeVeg } from "@/components/ui/badge-veg";
 import { ShoppingCart, Star, Eye, ChevronRight, Zap } from "lucide-react";
@@ -14,6 +14,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const navigate = useNavigate(); // Initialize useNavigate
   const {
     id,
     name,
@@ -42,6 +43,20 @@ export default function ProductCard({ product }: ProductCardProps) {
     setTimeout(() => {
       button.classList.remove("animate-ping-once");
     }, 300);
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!selectedWeight) {
+      // Optionally show a toast or alert if no weight is selected
+      return;
+    }
+    addItem(product, selectedWeight); // Add to cart
+    navigate("/checkout"); // Navigate directly to checkout
+
+    const button = e.currentTarget as HTMLButtonElement;
+    button.classList.add("animate-ping-once"); // Visual feedback
+    setTimeout(() => button.classList.remove("animate-ping-once"), 300);
   };
 
   const renderTags = (tags: string[]) =>
@@ -149,13 +164,22 @@ export default function ProductCard({ product }: ProductCardProps) {
                       <p className="text-xs text-red-600 mt-1">Only {stock} units left</p>
                     )}
                   </div>
-                  <Button
-                    onClick={handleAdd}
-                    className="bg-pickle-600 hover:bg-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleBuyNow}
+                      variant="outline"
+                      className="text-pickle-600 border-pickle-600 hover:bg-pickle-50 hover:text-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      Buy Now
+                    </Button>
+                    <Button
+                      onClick={handleAdd}
+                      className="bg-pickle-600 hover:bg-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Add to Cart
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -224,13 +248,22 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="mt-auto flex items-center justify-between">
           <span className="text-xl font-bold text-pickle-700">{formatPrice(price)}</span>
-          <Button
-            onClick={handleAdd}
-            className="bg-pickle-600 hover:bg-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Add to Cart
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleBuyNow}
+              variant="outline"
+              className="text-pickle-600 border-pickle-600 hover:bg-pickle-50 hover:text-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              Buy Now
+            </Button>
+            <Button
+              onClick={handleAdd}
+              className="bg-pickle-600 hover:bg-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Add to Cart
+            </Button>
+          </div>
         </div>
 
         {stock > 0 && stock < 20 && (
