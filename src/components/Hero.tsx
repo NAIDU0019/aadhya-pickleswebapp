@@ -91,7 +91,7 @@ export default function Hero() {
           <div className="relative">
             <div className="relative z-10 rounded-xl overflow-hidden shadow-2xl border-8 border-white">
               <img 
-                src="/banner.jpe"
+                src="/banner.jpeg"
                 alt="Assorted pickles in glass jars with fresh ingredients"
                 className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 loading="eager"
