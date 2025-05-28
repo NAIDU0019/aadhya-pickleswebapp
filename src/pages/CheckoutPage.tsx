@@ -47,9 +47,8 @@ const ADDITIONAL_FEES = 0; // Flat additional fees example
 
 // Define your coupons here. In a real application, these would likely come from a database.
 const COUPONS = [
-  { code: "ADHYAAww5", discountPercent: 0.05 }, // 6% discount
-  { code: "ADHYAAww10", discountPercent: 0.10 },
-  { code: "FIRSTORDER", discountPercent: 0.10 },// 12% discount
+  { code: "ADHYAA6", discountPercent: 0.06 }, // 6% discount
+  { code: "ADHYAA12", discountPercent: 0.12 }, // 12% discount
 ];
 
 const CheckoutPage = () => {
@@ -169,8 +168,8 @@ const CheckoutPage = () => {
   const shippingCost = subtotal > 1000 ? 0 : 100; // Free shipping over ₹1000
   const initialFinalTotal = subtotal + taxes + shippingCost + ADDITIONAL_FEES;
 
-  // Calculate discount amount based on applied coupon
-  const discountAmount = appliedCoupon ? subtotal * appliedCoupon.discountPercent : 0;
+  // Calculate discount amount based on applied coupon - NOW APPLIED TO THE FULL INITIAL TOTAL
+  const discountAmount = appliedCoupon ? initialFinalTotal * appliedCoupon.discountPercent : 0;
 
   // Recalculate final total with discount
   const finalTotalWithDiscount = initialFinalTotal - discountAmount;
