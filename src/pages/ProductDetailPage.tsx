@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { Helmet } from "react-helmet";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,12 +11,14 @@ import { ShoppingCart, Minus, Plus, ChevronLeft, Star } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { products } from "@/data/products";
-import ProductList from "@/components/ProductList";  
+// import ProductList from "@/components/ProductList"; // Not directly used in this file's render, but good to keep if used elsewhere
+import toast from "react-hot-toast"; // Import toast for notifications
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const product = products.find((p) => p.id === id);
 
@@ -52,11 +54,39 @@ const ProductDetailPage = () => {
 
   const handleAddToCart = () => {
     addItem(product, selectedWeight, quantity);
+    toast.success(`${quantity} x ${product.name} (${selectedWeight}g) added to cart!`, {
+      position: "bottom-right",
+      duration: 3000,
+    });
+  };
+
+  const handleBuyNow = () => {
+    addItem(product, selectedWeight, quantity); // Add to cart first
+    toast.success(`${quantity} x ${product.name} (${selectedWeight}g) added to cart! Redirecting to checkout...`, {
+      position: "bottom-right",
+      duration: 2000,
+    });
+    // Simulate redirection to a checkout page
+    setTimeout(() => {
+      navigate("/checkout"); // Replace with your actual checkout path
+    }, 1000);
   };
 
   const relatedProducts = products
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
+
+  // Static review data for demonstration
+  const reviews = [
+    { id: 1, author: "Swati", rating: 4, comment: "Delicious and spicy! Reminds me of home." },
+    { id: 2, author: "Rahul K.", rating: 5, comment: "Authentic taste, highly recommend the mango pickle." },
+    { id: 3, author: "Priya S.", rating: 3, comment: "Good, but a bit too salty for my taste." },
+  ];
+
+  // Calculate average rating
+  const averageRating = reviews.length > 0
+    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length)
+    : 0;
 
   return (
     <>
@@ -92,21 +122,28 @@ const ProductDetailPage = () => {
                 <div className="flex items-center space-x-2 mb-4">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < Math.round(averageRating) ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                        }`}
+                      />
                     ))}
                   </div>
-                  <span className="text-sm text-muted-foreground">(24 reviews)</span>
+                  <span className="text-sm text-muted-foreground">({reviews.length} reviews)</span>
                 </div>
 
                 <div className="mb-4">
-                  <label className="font-medium block mb-2">Select Weight:</label>
-                  <div className="flex gap-2">
+                  <label htmlFor="select-weight" className="font-medium block mb-2">Select Weight:</label>
+                  <div className="flex gap-2" role="radiogroup" aria-labelledby="select-weight">
                     {Object.entries(product.pricePerWeight).map(([weight]) => (
                       <Button
                         key={weight}
                         variant={selectedWeight === weight ? "default" : "outline"}
                         size="sm"
                         onClick={() => setSelectedWeight(weight)}
+                        aria-checked={selectedWeight === weight}
+                        role="radio"
                       >
                         {weight}g
                       </Button>
@@ -132,11 +169,11 @@ const ProductDetailPage = () => {
                 <div className="mb-6">
                   <p className="font-medium mb-2">Quantity</p>
                   <div className="flex items-center">
-                    <Button variant="outline" size="icon" onClick={decreaseQuantity} disabled={quantity <= 1}>
+                    <Button variant="outline" size="icon" onClick={decreaseQuantity} disabled={quantity <= 1} aria-label="Decrease quantity">
                       <Minus className="h-4 w-4" />
                     </Button>
-                    <span className="mx-4 min-w-[2rem] text-center">{quantity}</span>
-                    <Button variant="outline" size="icon" onClick={increaseQuantity}>
+                    <span className="mx-4 min-w-[2rem] text-center" aria-live="polite">{quantity}</span>
+                    <Button variant="outline" size="icon" onClick={increaseQuantity} aria-label="Increase quantity">
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
@@ -147,7 +184,7 @@ const ProductDetailPage = () => {
                     <ShoppingCart className="h-4 w-4 mr-2" />
                     Add to Cart
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={handleBuyNow}>
                     Buy Now
                   </Button>
                 </div>
@@ -157,11 +194,11 @@ const ProductDetailPage = () => {
             {/* Tabs */}
             <Tabs defaultValue="description" className="mb-16">
               <TabsList className="mb-6">
-                <TabsTrigger value="description">Description</TabsTrigger>
-                <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="description" aria-controls="description-tab-panel">Description</TabsTrigger>
+                <TabsTrigger value="ingredients" aria-controls="ingredients-tab-panel">Ingredients</TabsTrigger>
+                <TabsTrigger value="reviews" aria-controls="reviews-tab-panel">Reviews ({reviews.length})</TabsTrigger>
               </TabsList>
-              <TabsContent value="description" className="bg-white p-6 rounded-lg shadow-sm">
+              <TabsContent value="description" id="description-tab-panel" role="tabpanel" tabIndex={0} className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold mb-4">Product Description</h3>
                 <p className="mb-4">{product.description}</p>
                 <p>
@@ -170,14 +207,36 @@ const ProductDetailPage = () => {
                 <h4 className="text-lg font-semibold mt-6 mb-3">Storage Instructions</h4>
                 <p>Store in a cool, dry place. Refrigerate after opening and consume within 6 months.</p>
               </TabsContent>
-              <TabsContent value="ingredients" className="bg-white p-6 rounded-lg shadow-sm">
+              <TabsContent value="ingredients" id="ingredients-tab-panel" role="tabpanel" tabIndex={0} className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold mb-4">Ingredients</h3>
                 <p>{product.ingredients}</p>
               </TabsContent>
-              <TabsContent value="reviews" className="bg-white p-6 rounded-lg shadow-sm">
+              <TabsContent value="reviews" id="reviews-tab-panel" role="tabpanel" tabIndex={0} className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
-                {/* Reviews UI - static or fetch from backend */}
-                <p>★★★★☆ - "Delicious and spicy! Reminds me of home." - Swati</p>
+                {reviews.length > 0 ? (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="border-b pb-4 last:border-b-0 last:pb-0">
+                        <div className="flex items-center mb-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="font-semibold text-sm mb-1">{review.author}</p>
+                        <p className="text-sm text-muted-foreground">{review.comment}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No reviews yet. Be the first to review this product!</p>
+                )}
+                {/* You can add a review submission form here */}
+                {/* <Button className="mt-4">Write a Review</Button> */}
               </TabsContent>
             </Tabs>
 
@@ -198,7 +257,11 @@ const ProductDetailPage = () => {
                         </div>
                         <div className="p-4">
                           <h3 className="font-medium">{relatedProduct.name}</h3>
-                          <p className="text-muted-foreground text-sm mb-1">Starting from ₹{relatedProduct.pricePerWeight["250"]}</p>
+                          {/* Displaying price of the smallest weight for related products */}
+                          <p className="text-muted-foreground text-sm mb-1">
+                            Starting from {formatPrice(Object.values(relatedProduct.pricePerWeight)[0])}
+                          </p>
+                          <BadgeVeg variant={relatedProduct.type} className="text-xs" />
                         </div>
                       </div>
                     </Link>
@@ -208,7 +271,7 @@ const ProductDetailPage = () => {
             )}
           </div>
         </main>
-        
+
         <Footer />
       </div>
     </>
