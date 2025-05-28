@@ -12,8 +12,6 @@ import { toast } from "@/components/ui/sonner";
 import { formatPrice } from "@/lib/utils";
 import RazorpayCheckout from "@/components/RazorpayCheckout";
 
-// import { saveOrder } from '../lib/supabaseOrders'; // This import might be unused if not saving to Supabase here
-
 import {
   Form,
   FormControl,
@@ -49,7 +47,7 @@ const ADDITIONAL_FEES = 0; // Flat additional fees example
 
 const CheckoutPage = () => {
   const { user, isSignedIn } = useUser();
-  const { items, updateItemQuantity, removeItem } = useCart(); // Removed contextTotal as it's recalculated
+  const { items, updateItemQuantity, removeItem, clearCart } = useCart(); // Added clearCart
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRazorpayButton, setShowRazorpayButton] = useState(false);
@@ -163,7 +161,8 @@ const CheckoutPage = () => {
   const handleSendEmailAndNavigate = async (data: CheckoutFormValues, paymentId?: string) => {
     try {
       // Replace with your actual backend URL for sending emails
-      await fetch("http://localhost:5000/api/send-email", {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"; // Use environment variable for backend URL
+      await fetch(`${backendUrl}/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -184,6 +183,7 @@ const CheckoutPage = () => {
       console.error("Failed to send confirmation email:", error);
       toast.error("Order placed but failed to send confirmation email.");
     } finally {
+      clearCart(); // Clear the cart after placing the order
       // Navigate to success page, passing order details in state
       navigate("/checkout-success", {
         state: {
