@@ -160,7 +160,7 @@ const CheckoutPage = () => {
   // Function to send email and navigate to success page
   const handleSendEmailAndNavigate = async (data: CheckoutFormValues, paymentId?: string) => {
     try {
-      // Replace with your actual backend URL for sending emails
+      // Use environment variable for backend URL
       const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"; // Use environment variable for backend URL
       await fetch(`${backendUrl}/api/send-email`, {
         method: "POST",
@@ -513,6 +513,13 @@ const CheckoutPage = () => {
                     <span>Total</span>
                     <span>{formatPrice(finalTotal)}</span>
                   </div>
+                </div>
+
+                {/* New: Continue Shopping Button */}
+                <div className="mt-6">
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/products")}>
+                    Continue Shopping / Add More Items
+                  </Button>
                 </div>
               </div>
             </div>
