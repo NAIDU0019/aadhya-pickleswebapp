@@ -56,14 +56,15 @@ const CheckoutPage = () => {
   const { user, isSignedIn } = useUser();
   const { items, updateItemQuantity, removeItem, clearCart } = useCart();
   const navigate = useNavigate();
-  
+
   // State for coupon management
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountPercent: number } | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRazorpayButton, setShowRazorpayButton] = useState(false);
-  const [customerInfo, setCustomerInfo] = useState<any>(null); // State to hold form data for Razorpay
+  // Renamed customerInfo to customerInfoForPayment to be more descriptive
+  const [customerInfoForPayment, setCustomerInfoForPayment] = useState<any>(null);
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
 
   const form = useForm<CheckoutFormValues>({
@@ -212,14 +213,15 @@ const CheckoutPage = () => {
   };
 
   // Function to send email and navigate to success page
-  const handleSendEmailAndNavigate = async (data: CheckoutFormValues, paymentId?: string) => {
+  // Updated type definition to include orderId
+  const handleSendEmailAndNavigate = async (data: CheckoutFormValues & { orderId?: string }, paymentId?: string) => {
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
       await fetch(`${backendUrl}/api/send-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Applied-Coupon": appliedCoupon?.code || "" // Send coupon code to backend for server-side validation
+          "X-Applied-Coupon": appliedCoupon?.code || ""
         },
         body: JSON.stringify({
           email: data.email,
@@ -230,9 +232,9 @@ const CheckoutPage = () => {
           postalCode: data.postalCode,
           phoneNumber: data.phoneNumber,
           paymentMethod: data.paymentMethod,
-          totalAmount: finalTotal, // Send the final calculated total
           orderDetails: { items, subtotal, discountAmount, taxes, shippingCost, additionalFees: ADDITIONAL_FEES, finalTotal },
-          paymentId: paymentId, // Include Razorpay payment ID if available
+          paymentId: paymentId,
+          orderId: data.orderId, // Pass the generated orderId here
         }),
       });
       toast.success("Order placed and confirmation email sent!");
@@ -246,7 +248,8 @@ const CheckoutPage = () => {
         state: {
           customerInfo: data,
           orderedItems: items,
-          orderTotal: finalTotal, // Pass the final total
+          orderTotal: finalTotal,
+          orderId: data.orderId, // Also pass the orderId to the success page
         },
       });
       setIsSubmitting(false); // Re-enable button after navigation attempt
@@ -257,18 +260,24 @@ const CheckoutPage = () => {
   const onSubmit = (data: CheckoutFormValues) => {
     setIsSubmitting(true);
 
+    // Generate a simple client-side order ID (e.g., timestamp)
+    // IMPORTANT: For a production system, this should ideally come from your backend after order creation.
+    const newOrderId = `ADH-${Date.now()}`; // Example: ADH-1716896000000
+
     if (data.paymentMethod === "razorpay") {
-      setCustomerInfo(data); // Store form data for Razorpay component
+      // Store form data AND the generated orderId for Razorpay component
+      setCustomerInfoForPayment({...data, orderId: newOrderId});
       setShowRazorpayButton(true); // Show Razorpay button/modal
-      // isSubmitting remains true until Razorpay callback, or set to false on failure
     } else if (data.paymentMethod === "cod") {
-      handleSendEmailAndNavigate(data); // Process COD order directly
+      // Pass the combined data object including orderId
+      handleSendEmailAndNavigate({...data, orderId: newOrderId});
     } else {
       // Fallback for other payment methods or direct submission without payment gateway
       setTimeout(() => {
         console.log("Order submitted:", { orderData: data, products: items });
         toast.success("Your order has been placed successfully!");
-        handleSendEmailAndNavigate(data); // Also send email for this path
+        // Pass the combined data object including orderId
+        handleSendEmailAndNavigate({...data, orderId: newOrderId});
       }, 1500);
     }
   };
@@ -497,15 +506,16 @@ const CheckoutPage = () => {
               </div>
 
               {/* Razorpay Checkout Component (renders when showRazorpayButton is true) */}
-              {showRazorpayButton && customerInfo && (
+              {showRazorpayButton && customerInfoForPayment && ( // Use customerInfoForPayment
                 <RazorpayCheckout
                   amount={finalTotal} // Pass the final total to Razorpay
-                  customerInfo={customerInfo}
+                  customerInfo={customerInfoForPayment} // customerInfoForPayment now includes orderId
                   onSuccess={(paymentResponse: any) => {
                     toast.success("Payment successful!");
                     setShowRazorpayButton(false);
                     // Call the combined function to send email and navigate after successful payment
-                    handleSendEmailAndNavigate(customerInfo, paymentResponse.razorpay_payment_id);
+                    // Pass the complete customerInfoForPayment object (which includes orderId)
+                    handleSendEmailAndNavigate(customerInfoForPayment, paymentResponse.razorpay_payment_id);
                   }}
                   onFailure={() => {
                     toast.error("Payment failed. Please try again.");
