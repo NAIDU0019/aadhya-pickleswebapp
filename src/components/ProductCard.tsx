@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BadgeVeg } from "@/components/ui/badge-veg";
 import { ShoppingCart, Star, Eye, ChevronRight, Zap } from "lucide-react";
@@ -14,6 +14,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const {
     id,
     name,
@@ -36,12 +37,21 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     if (!selectedWeight) return;
     addItem(product, selectedWeight);
-
     const button = e.currentTarget as HTMLButtonElement;
     button.classList.add("animate-ping-once");
     setTimeout(() => {
       button.classList.remove("animate-ping-once");
     }, 300);
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!selectedWeight) return;
+    addItem(product, selectedWeight);
+    navigate("/checkout");
+    const button = e.currentTarget as HTMLButtonElement;
+    button.classList.add("animate-ping-once");
+    setTimeout(() => button.classList.remove("animate-ping-once"), 300);
   };
 
   const renderTags = (tags: string[]) =>
@@ -149,13 +159,22 @@ export default function ProductCard({ product }: ProductCardProps) {
                       <p className="text-xs text-red-600 mt-1">Only {stock} units left</p>
                     )}
                   </div>
-                  <Button
-                    onClick={handleAdd}
-                    className="bg-pickle-600 hover:bg-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleBuyNow}
+                      variant="outline"
+                      className="text-pickle-600 border-pickle-600 hover:bg-pickle-50 hover:text-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      Buy Now
+                    </Button>
+                    <Button
+                      onClick={handleAdd}
+                      className="bg-pickle-600 hover:bg-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Add to Cart
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -171,7 +190,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={`${name} pickle`}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 text-white p-4 flex flex-col justify-end transition-opacity duration-300">
             <p className="text-sm">{description || "Premium handcrafted pickle"}</p>
             <button className="self-start mt-2 flex items-center text-xs font-medium hover:underline">
@@ -224,18 +242,23 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="mt-auto flex items-center justify-between">
           <span className="text-xl font-bold text-pickle-700">{formatPrice(price)}</span>
-          <Button
-            onClick={handleAdd}
-            className="bg-pickle-600 hover:bg-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Add to Cart
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleAdd}
+              className="bg-pickle-600 hover:bg-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Add
+            </Button>
+            <Button
+              onClick={handleBuyNow}
+              variant="outline"
+              className="text-pickle-600 border-pickle-600 hover:bg-pickle-50 hover:text-pickle-700 transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              Buy
+            </Button>
+          </div>
         </div>
-
-        {stock > 0 && stock < 20 && (
-          <p className="mt-2 text-xs text-red-600 font-medium">Only {stock} units left</p>
-        )}
       </CardContent>
     </Card>
   );
