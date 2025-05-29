@@ -17,8 +17,8 @@ const TermsAndConditions = () => {
           </p>
           <p>
             This document is published in accordance with the provisions of Rule 3(1) of the Information Technology (Intermediaries guidelines) Rules, 2011 that require publishing the rules and regulations, privacy policy and Terms of Use for access or usage of domain name{" "}
-            <a href="https://adhyaapickles.com/" className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
-              https://adhyaapickles.com/
+            <a href="https://adhyaapickles.in/" className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
+              https://adhyaapickles.in/
             </a>{" "}
             ("Website"), including the related mobile site and mobile application (hereinafter referred to as "Platform").
           </p>
