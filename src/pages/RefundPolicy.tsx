@@ -80,9 +80,9 @@ export default function RefundPolicy() {
           <h2 className="text-2xl font-semibold mb-4 font-display text-foreground">7. Contact Us</h2>
           <p className="mb-2">If you have any questions about our Refund & Returns Policy, please contact us:</p>
           <ul className="list-disc list-inside space-y-1 ml-4">
-            <li><strong>Email:</strong> <a href="mailto:support@adhyaapickles.com" className="text-blue-600 hover:underline">support@adhyaapickles.com</a></li>
-            <li><strong>Phone:</strong> <a href="tel:+911234567890" className="text-blue-600 hover:underline">[Your Customer Service Phone Number Here]</a></li>
-            <li><strong>Address:</strong> [Your Company Address Here, if applicable for communication]</li>
+            <li><strong>Email:</strong> <a href="tech.adhyaapickles@gmail.com" className="text-blue-600 hover:underline">tech.adhyaapickles@gmail.com</a></li>
+            <li><strong>Phone:</strong> <a href="tel:7995060659" className="text-blue-600 hover:underline">7995060659</a></li>
+            <li><strong>Address:</strong> YENDAPALLI, KRUTHIVENNU MANDAL, KRISHNA DISTRICT, 521324 </li>
           </ul>
         </section>
       </div>
