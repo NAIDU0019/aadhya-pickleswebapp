@@ -79,7 +79,7 @@ const TermsAndConditions = () => {
         <section className="mb-6">
           <h2 className="text-xl font-semibold mb-2">Governing Law and Jurisdiction</h2>
           <p>
-            These Terms and any dispute or claim relating to it shall be governed by and construed in accordance with the laws of India. All disputes shall be subject to the exclusive jurisdiction of the courts in Erode, Tamil Nadu.
+            These Terms and any dispute or claim relating to it shall be governed by and construed in accordance with the laws of India. All disputes shall be subject to the exclusive jurisdiction of the courts in Machilipatnam,Andhra Pradesh
           </p>
         </section>
 
