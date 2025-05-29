@@ -67,7 +67,9 @@ export default function RefundPolicy() {
           <p className="mb-2">If your claim is approved:</p>
           <ul className="list-disc list-inside space-y-1 ml-4">
             <li><strong>Damaged/Incorrect/Missing Product:</strong> We will offer you a replacement of the same product at no additional cost, or a full refund to your original payment method, at our discretion.</li>
-            <li><strong>Refund Processing:</strong> Refunds will be processed within <strong>7-10 business days</strong> after approval. The time for the refund to reflect in your account may vary depending on your bank or payment provider.</li>
+            <li><strong>Refund Processing:</strong> Refunds will be processed within <strong>7-10 business days</strong> after approval. The time for the refund to reflect in your account may vary depending on your bank or payment provider.
+            All the Approved exchange and replacement will be completed with in 7 business days
+Refunds will be credited back to the original payment method in 7 business days</li>
           </ul>
         </section>
 
