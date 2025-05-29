@@ -17,7 +17,8 @@ export default function RefundPolicy() {
       <div className="space-y-8 text-muted-foreground">
         <section>
           <h2 className="text-2xl font-semibold mb-4 font-display text-foreground">1. Eligibility for Refund & Returns</h2>
-          <p className="mb-2">Due to the perishable nature of our products and for hygiene reasons, we can only accept returns and offer refunds under the following specific conditions:</p>
+          <p className="mb-2">we have 7 day return policy
+            Due to the perishable nature of our products and for hygiene reasons, we can only accept returns and offer refunds under the following specific conditions:</p>
           <ul className="list-disc list-inside space-y-1 ml-4">
             <li><strong>Damaged Product:</strong> If your order arrives damaged or tampered with.</li>
             <li><strong>Incorrect Product:</strong> If you receive a product different from what you ordered.</li>
