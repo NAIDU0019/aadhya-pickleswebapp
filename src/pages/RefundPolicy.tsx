@@ -41,7 +41,7 @@ export default function RefundPolicy() {
           <h2 className="text-2xl font-semibold mb-4 font-display text-foreground">3. How to Initiate a Return/Refund</h2>
           <p className="mb-2">To initiate a claim, please follow these steps:</p>
           <ol className="list-decimal list-inside space-y-1 ml-4">
-            <li><strong>Contact Us:</strong> Immediately email us at <a href="mailto:support@adhyaapickles.com" className="text-blue-600 hover:underline">support@adhyaapickles.com</a> or call us at <a href="tel:+911234567890" className="text-blue-600 hover:underline">[Your Customer Service Phone Number Here]</a> within the 24-hour window.</li>
+            <li><strong>Contact Us:</strong> Immediately email us at <a href="mailto:tech.adhyaapickles@gmail.com" className="text-blue-600 hover:underline">tech.adhyaapickles@gmail.com</a> or call us at <a href="tel:7995960659" className="text-blue-600 hover:underline">7995960659</a> within the 24-hour window.</li>
             <li><strong>Provide Details:</strong> In your email, please include:
               <ul className="list-disc list-inside space-y-1 ml-8">
                 <li>Your Order Number.</li>
