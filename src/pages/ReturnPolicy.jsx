@@ -17,7 +17,7 @@ const ReturnPolicy = () => {
           To initiate a return, please contact our customer support with your order details.
         </p>
         <p className="mb-4">
-          Refunds will be processed within 5-7 business days after we receive the returned product.
+          Refunds will be processed and Credited within 5-7 business days after we receive the returned product.
         </p>
       </main>
       <Footer />
